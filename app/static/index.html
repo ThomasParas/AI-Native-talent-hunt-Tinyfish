@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claim Receipts</title>
+<style>
+  :root {
+    --bg: #0d0f14; --panel: #151922; --line: #252b38; --text: #e8ecf3; --muted: #8a93a6;
+    --ok: #2fd17b; --bad: #ff4d6d; --warn: #f5b84b; --accent: #5b8cff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+  header { padding: 20px 28px; border-bottom: 1px solid var(--line); display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -0.01em; }
+  h1 small { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  form { display: flex; gap: 8px; margin-left: auto; flex: 1; max-width: 560px; }
+  input { flex: 1; background: var(--panel); border: 1px solid var(--line); color: var(--text); padding: 9px 12px; border-radius: 8px; font: inherit; }
+  button { background: var(--accent); color: white; border: 0; padding: 9px 18px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: wait; }
+  main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; padding: 20px 28px; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 12px; }
+  .summary { display: flex; gap: 10px; margin-bottom: 14px; }
+  .summary div { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .summary b { display: block; font-size: 22px; }
+  .claim { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--bg); }
+  .top { display: flex; gap: 10px; align-items: flex-start; }
+  .text { flex: 1; font-weight: 600; }
+  .pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 99px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  .pending { background: #252b38; color: var(--muted); }
+  .verified { background: rgba(47,209,123,.15); color: var(--ok); }
+  .contradicted { background: rgba(255,77,109,.15); color: var(--bad); }
+  .unverifiable { background: rgba(245,184,75,.15); color: var(--warn); }
+  .chips { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { font-size: 11px; border: 1px solid var(--line); color: var(--muted); padding: 1px 8px; border-radius: 6px; }
+  .chip.route { border-color: var(--accent); color: var(--accent); }
+  .reason { color: var(--muted); margin-top: 8px; }
+  .reason q { color: var(--text); font-style: italic; margin-left: 4px; }
+  .reason a { color: var(--accent); margin-left: 6px; }
+  .shot { margin-top: 10px; width: 100%; border-radius: 8px; border: 1px solid var(--line); cursor: zoom-in; max-height: 180px; object-fit: cover; }
+  .shot.big { max-height: none; cursor: zoom-out; }
+  #live { width: 100%; aspect-ratio: 16 / 10; border: 1px solid var(--line); border-radius: 8px; background: #000; display: grid; place-items: center; color: var(--muted); overflow: hidden; }
+  #live iframe { width: 100%; height: 100%; border: 0; }
+  #log { font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); max-height: 220px; overflow: auto; margin-top: 12px; }
+  #log div::before { content: "› "; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  td, th { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .note { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧾 Claim Receipts <small>every landing-page claim, checked by the primitive that can prove it</small></h1>
+  <form id="f">
+    <input id="url" value="https://www.tinyfish.ai" aria-label="Landing page URL">
+    <button id="go">Check claims</button>
+  </form>
+</header>
+<main>
+  <section class="panel">
+    <h2>Receipts</h2>
+    <div class="summary">
+      <div><b id="n-ok">0</b>verified</div>
+      <div><b id="n-bad">0</b>contradicted</div>
+      <div><b id="n-warn">0</b>unverifiable</div>
+    </div>
+    <div id="claims"><p class="note">Enter a landing page and press <b>Check claims</b>.</p></div>
+  </section>
+  <div class="stack">
+    <section class="panel">
+      <h2>Agent: live funnel walk</h2>
+      <div id="live">The TinyFish Agent's live browser appears here</div>
+      <p class="note">Hard rule: the agent never types, submits, or signs in. It stops at the first gate.</p>
+      <div id="log"></div>
+    </section>
+    <section class="panel">
+      <h2>Primitive trace</h2>
+      <table><thead><tr><th>Primitive</th><th>Job</th><th>Secs</th><th></th></tr></thead><tbody id="trace"></tbody></table>
+    </section>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const state = {};
+
+// Tiny DOM builder: text is always set via textContent, never parsed as HTML.
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  for (const c of children.flat()) if (c != null && c !== false) el.append(c);
+  return el;
+}
+const safeUrl = (u) => { try { const p = new URL(u, location.href); return ["http:", "https:"].includes(p.protocol) ? p.href : null; } catch { return null; } };
+
+function log(msg) { $("log").append(h("div", { text: msg })); $("log").scrollTop = 1e9; }
+
+function claimCard(c) {
+  const status = c.status || "pending";
+  const prims = [...new Set(c.primitives || ["Fetch"])];
+  const src = safeUrl(c.source_url);
+  const shot = safeUrl(c.screenshot);
+  return h("div", { class: "claim" },
+    h("div", { class: "top" },
+      h("div", { class: "text", text: c.claim }),
+      h("span", { class: `pill ${status}`, text: status === "pending" ? "checking…" : status })),
+    h("div", { class: "chips" },
+      h("span", { class: "chip route", text: c.route === "funnel" ? "funnel → Agent" : "outside → Search" }),
+      prims.map((p) => h("span", { class: "chip", text: p }))),
+    c.reasoning && h("div", { class: "reason" },
+      c.reasoning,
+      c.evidence_quote && h("q", { text: c.evidence_quote }),
+      src && h("a", { href: src, target: "_blank", rel: "noopener", text: "source ↗" })),
+    shot ? h("img", { class: "shot", src: shot, alt: "Claim highlighted on the live page", onclick: (e) => e.target.classList.toggle("big") })
+         : c.screenshot === null && h("p", { class: "note", text: "Browser: claim text not located as a single element on the live page." }));
+}
+
+function render() {
+  const items = Object.values(state);
+  $("claims").replaceChildren(...items.map(claimCard));
+  const count = (s) => String(items.filter((c) => c.status === s).length);
+  $("n-ok").textContent = count("verified"); $("n-bad").textContent = count("contradicted"); $("n-warn").textContent = count("unverifiable");
+}
+
+function renderTrace(entries) {
+  $("trace").replaceChildren(...entries.map((e) => h("tr", {},
+    h("td", {}, h("b", { text: e.primitive })),
+    h("td", {}, e.purpose, h("br"), h("span", { class: "note", text: e.detail })),
+    h("td", { text: String(e.seconds) }),
+    h("td", { text: e.ok ? "✅" : "⚠️" }))));
+}
+
+function setLive(content) { $("live").replaceChildren(content); }
+
+$("f").addEventListener("submit", (e) => {
+  e.preventDefault();
+  for (const k in state) delete state[k];
+  $("claims").replaceChildren(h("p", { class: "note", text: "Fetching the page…" }));
+  $("log").replaceChildren(); $("trace").replaceChildren();
+  setLive("Waiting for the Agent to start…");
+  $("go").disabled = true;
+  const es = new EventSource(`/api/run?url=${encodeURIComponent($("url").value)}`);
+  es.onmessage = (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === "step") log(ev.message);
+    if (ev.type === "agent_progress") log(`Agent: ${ev.message}`);
+    if (ev.type === "claims") { ev.claims.forEach((c) => (state[c.id] = { ...c, primitives: ["Fetch"] })); log(`Claude: ${ev.claims.length} claims routed`); render(); }
+    if (ev.type === "claim_update" && state[ev.id]) { Object.assign(state[ev.id], ev); render(); }
+    if (ev.type === "agent_live" && safeUrl(ev.url)) setLive(h("iframe", { src: safeUrl(ev.url), allow: "fullscreen" }));
+    if (ev.type === "agent_result") log(`Agent: stopped at "${ev.result?.gate_type ?? "?"}" gate; card requested before account: ${ev.result?.credit_card_requested_before_account}`);
+    if (ev.type === "trace") renderTrace(ev.entries);
+    if (ev.type === "error") log(`Error: ${ev.message}`);
+    if (ev.type === "done") { log(`Done. Report saved: ${ev.report}`); es.close(); $("go").disabled = false; }
+  };
+  es.onerror = () => { es.close(); $("go").disabled = false; };
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "claim-receipts",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--directory", "app", "uvicorn", "server:app", "--port", "8000"],
+      "port": 8000
+    }
+  ]
+}

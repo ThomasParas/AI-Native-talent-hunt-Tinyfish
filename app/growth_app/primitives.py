@@ -92,6 +92,56 @@ def agent(url: str, goal: str, trace: Trace, purpose: str, on_progress=None, **k
         raise
 
 
+_HIGHLIGHT_JS = """el => {
+  el.style.outline = '4px solid #ff3b6b';
+  el.style.outlineOffset = '4px';
+  el.style.background = 'rgba(255, 59, 107, 0.12)';
+  el.scrollIntoView({block: 'center'});
+}"""
+
+
+async def browser_claim_shots(url: str, quotes: dict[str, str], out_dir: Path, trace: Trace, purpose: str) -> dict[str, Path | None]:
+    """Browser: one cloud session; find each claim's exact text on the live page, highlight it, screenshot it."""
+    from playwright.async_api import async_playwright
+
+    t = time.time()
+    shots: dict[str, Path | None] = {}
+    try:
+        session = client().browser.sessions.create(url=url)
+        async with async_playwright() as p:
+            browser = await p.chromium.connect_over_cdp(session.cdp_url)
+            ctx = browser.contexts[0] if browser.contexts else await browser.new_context()
+            page = ctx.pages[0] if ctx.pages else await ctx.new_page()
+            await page.set_viewport_size({"width": 1280, "height": 800})
+            if not page.url.startswith("http"):
+                await page.goto(url, wait_until="domcontentloaded")
+            try:
+                await page.wait_for_load_state("networkidle", timeout=10000)
+            except Exception:
+                pass
+            out_dir.mkdir(parents=True, exist_ok=True)
+            for claim_id, quote in quotes.items():
+                shots[claim_id] = None
+                try:
+                    loc = page.get_by_text(quote, exact=False).first
+                    await loc.wait_for(state="attached", timeout=4000)
+                    await loc.evaluate(_HIGHLIGHT_JS)
+                    await page.wait_for_timeout(300)
+                    path = out_dir / f"claim-{claim_id}.png"
+                    await page.screenshot(path=str(path))
+                    shots[claim_id] = path
+                    await loc.evaluate("el => { el.style.outline = ''; el.style.background = ''; }")
+                except Exception:
+                    continue  # claim text not rendered as a single visible node; recorded as "not located"
+            await browser.close()
+        found = sum(1 for v in shots.values() if v)
+        trace.add("Browser", purpose, t, True, f"located {found}/{len(quotes)} claims on the live page")
+        return shots
+    except Exception as e:
+        trace.add("Browser", purpose, t, False, str(e))
+        return shots
+
+
 async def browser_screenshot(url: str, out_path: Path, trace: Trace, purpose: str, full_page: bool = True) -> Path:
     """Browser: deterministic CDP control of a remote browser (e.g. evidence screenshots)."""
     from playwright.async_api import async_playwright
