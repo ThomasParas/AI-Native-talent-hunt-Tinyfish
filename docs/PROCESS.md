@@ -22,6 +22,7 @@ TinyFish (Sky Zhang, Head of Growth): ship an agent-led growth app on live TinyF
 | 13:27 | Pre-submit audit: app.zip had run instructions one level down (app/); repackaged so README.md sits at zip root; secrets scan of zip + full git history clean; fresh-unzip re-test | Claude Code checked brief wording against the artifact | Final zip + PROCESS.md + repo-link.txt |
 
 ## Decisions and trade-offs
+- Web access in the product is TinyFish only (Search, Fetch, Agent, Browser); no other scraping tool is used anywhere in `app/`. Early research (docs index, handbook, customer stories, cookbook, Pulse) went through a web connector that came pre-installed in the coding assistant (Firecrawl). In hindsight we'd connect TinyFish's MCP server to Claude Code first (`npx -y install-mcp@latest https://agent.tinyfish.ai/mcp --client claude-code`) so even the research step runs on TinyFish. That one-command onboarding is a DevRel win worth featuring in content.
 - Workflow B over A: every primitive has an essential job, failures degrade to "unverifiable" instead of breaking the demo, no risk of submitting real forms.
 - Target is TinyFish's own homepage: "we went first on ourselves" is credible DevRel and avoids looking adversarial.
 - Python + uv + official `tinyfish` SDK (0.9.0): SDK handles SSE, retries, typed responses.
