@@ -21,21 +21,38 @@ that can actually prove it**. Every claim ends in one of three explicit states, 
 ## We ran it on ourselves first
 
 The target for this build is **TinyFish's own homepage, [tinyfish.ai](https://www.tinyfish.ai)**. It isn't a sandbox
-or a rigged page. Here is the real run (`app/output/<run>/report.md`, about 90 seconds end to end):
+or a rigged page. This is the run in `demo-video.mp4` (run `20261011-131046`, ~95 seconds end to end):
 
-| | Claim on tinyfish.ai | Verdict | Checked by |
+| | Claim on tinyfish.ai | What the evidence said | Checked by |
 |---|---|---|---|
-| ✅ | 89.9% overall on Online-Mind2Web | Verified on the benchmarks page, **but flagged**: a TinyFish blog post's "40 failures out of 300" implies ~86.7% | Search + Fetch |
-| ⚠️ | 81.9% on *hard* Mind2Web tasks vs Operator 43.2% | Independent leaderboard confirms only the Claude number; no source for the 81.9% split | Search + Fetch |
-| ✅ | All 300 benchmark runs are open-sourced | Public spreadsheet + a Hacker News user who checked it | Search + Fetch |
-| ✅ | New users get $8 free credit | The Agent walked to the sign-up page and saw the $8 offer, with no card requested | **Agent** |
-| ✅ | Search and Fetch are free | The Agent reached pricing: Search $0.00/request, Fetch $0.00/url | **Agent** |
+| ✅ | 89.9% overall on Online-Mind2Web | Benchmarks page says 89.9%; the independent Steel leaderboard says 90.0% | Search + Fetch |
+| ✅ | 81.9% on hard tasks vs Operator 43.2%, Claude 32.4% | Hacker News launch post has the split; Steel leaderboard corroborates the Claude figure. Verdict notes the post is from a TinyFish employee | Search + Fetch |
+| ✅ | All 300 benchmark runs are open-sourced | Public spreadsheet, plus a Hacker News user who checked it | Search + Fetch |
+| ✅ | New users get $8 free credit | The **Agent** walked to pricing → sign-up and saw "Get $8 free"; stopped at the email form, no card requested | **Agent** |
+| ✅ | Search and Fetch are free on every plan | The Agent reached pricing: Search $0.00/request, Fetch $0.00/url | **Agent** |
 | ✅ | Agent $0.016/step, Browser $0.002/min | Matches the live pricing page | **Agent** |
-| ⚠️ | "The only platform" with all four behind one key | One key: confirmed. "Only": no independent comparison | Search + Fetch |
-| ⚠️ | TinyVault: model never sees credentials | No third-party source mentions TinyVault yet | Search + Fetch |
+| ⚠️ | "The only platform" with all four behind one key | One key: independently confirmed. "Only": no independent comparison | Search + Fetch |
+| ⚠️ | Search hits Google's live index, never cached | Only TinyFish's own page says so; no independent source | Search + Fetch |
 
-Three ⚠️ on our own homepage is the point. A tool that can say "I couldn't prove this" is one you can trust when it
-says ✅.
+Every claim also got a **Browser** pass that tries to highlight it on the live page. That located 4 of 8 this run;
+the rest are marked "not located" rather than faked.
+
+### Same target, four runs
+
+We ran tinyfish.ai four times in a row. The *shape* holds and the borderline calls move, which is what you want from
+a tool that weighs live evidence:
+
+| Run | ✅ verified | ❌ contradicted | ⚠️ unverifiable | Flagged 89.9% vs blog's "40 failures of 300" (≈86.7%) |
+|---|---|---|---|---|
+| 12:54 | 5 | 0 | 3 | yes |
+| 13:05 | 5 | 0 | 3 | yes |
+| 13:08 | 6 | 0 | 2 | no |
+| 13:10 (video) | 6 | 0 | 2 | no |
+
+The funnel claims (Agent) and "the only platform" (⚠️) came out the same in every run. The benchmark claims swing
+between ✅ and ⚠️ depending on which sources Search surfaces that minute. In two runs the judge caught that the
+89.9% headline and a TinyFish blog post's "40 failures out of 300" don't agree (~86.7%). A tool that can say
+"I couldn't prove this" is one you can trust when it says ✅.
 
 ## Which primitive does which job, and why that one
 

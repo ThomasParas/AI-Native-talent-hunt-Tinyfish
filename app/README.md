@@ -15,5 +15,5 @@ uv run python run.py https://www.tinyfish.ai
 ```
 
 Each run writes `output/<run_id>/report.md`, `report.json` and highlighted claim screenshots.
-A full run on tinyfish.ai takes ~90s (the Agent funnel walk is the long pole).
+A full run on tinyfish.ai takes 1.5–2 minutes (the Agent funnel walk is the long pole).
 See the top-level README.md for what each primitive does and why.
