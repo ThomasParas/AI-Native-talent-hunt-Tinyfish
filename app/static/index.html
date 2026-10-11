@@ -99,7 +99,7 @@ function h(tag, attrs = {}, ...children) {
   for (const c of children.flat()) if (c != null && c !== false) el.append(c);
   return el;
 }
-const safeUrl = (u) => { try { const p = new URL(u, location.href); return ["http:", "https:"].includes(p.protocol) ? p.href : null; } catch { return null; } };
+const safeUrl = (u) => { if (!u) return null; try { const p = new URL(u, location.href); return ["http:", "https:"].includes(p.protocol) ? p.href : null; } catch { return null; } };
 
 function log(msg) { $("log").append(h("div", { text: msg })); $("log").scrollTop = 1e9; }
 

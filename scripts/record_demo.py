@@ -7,6 +7,7 @@
 import asyncio
 import shutil
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
@@ -18,8 +19,7 @@ W, H = 1440, 900
 
 
 async def main() -> None:
-    video_dir = ROOT / "dist" / "video"
-    shutil.rmtree(video_dir, ignore_errors=True)
+    video_dir = Path(tempfile.mkdtemp(prefix="claim-receipts-video-"))
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         ctx = await browser.new_context(viewport={"width": W, "height": H}, record_video_dir=str(video_dir), record_video_size={"width": W, "height": H})
@@ -51,6 +51,7 @@ async def main() -> None:
     webm = next(video_dir.glob("*.webm"))
     out = ROOT / "demo-video.mp4"
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(webm), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "23", "-movflags", "+faststart", str(out)], check=True)
+    shutil.rmtree(video_dir, ignore_errors=True)
     print(f"wrote {out}")
 
 

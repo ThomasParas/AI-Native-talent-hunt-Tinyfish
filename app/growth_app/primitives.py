@@ -103,10 +103,11 @@ _HIGHLIGHT_JS = """el => {
 async def _locate(page, quote: str):
     """Exact quote first, then shorter word prefixes (rendered DOM text often splits across nodes)."""
     words = quote.split()
-    for n in dict.fromkeys([len(words), 5, 3]):
-        if n > len(words) or n < 2:
-            continue
-        loc = page.get_by_text(" ".join(words[:n]), exact=False)
+    candidates = [" ".join(words[:n]) for n in dict.fromkeys([len(words), 5, 3]) if 2 <= n <= len(words)]
+    # Last resort: a distinctive token like "89.9%" or "$8" (numbers often sit in their own element).
+    candidates += [w.strip(".,;:()") for w in words if any(ch.isdigit() for ch in w)]
+    for text in candidates:
+        loc = page.get_by_text(text, exact=False)
         try:
             for i in range(min(await loc.count(), 5)):
                 cand = loc.nth(i)
