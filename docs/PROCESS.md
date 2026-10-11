@@ -12,6 +12,7 @@ TinyFish (Sky Zhang, Head of Growth): ship an agent-led growth app on live TinyF
 |---|---|---|---|
 | 12:15 | Read TinyFish docs (llms.txt, For Coding Agents) and the participant handbook | Claude Code + Firecrawl scrape | Saved full API docs to `docs/tinyfish-llms-full.txt` |
 | 12:20 | Scaffolded repo: uv Python app, primitive wrappers with per-step trace, smoke test, packaging script | Claude Code; introspected SDK signatures instead of guessing | `app/`, `scripts/package.sh` |
+| 12:35 | Mapped existing TinyFish customer stories + cookbook to avoid duplicating them | Claude Code + Firecrawl (summaries of 6 stories, cookbook, docs, Pulse) | `docs/tinyfish-landscape.md`; dropped battlecard + lead-outreach ideas (already covered) |
 
 ## Decisions and trade-offs
 - Python + uv + official `tinyfish` SDK (0.9.0): SDK handles SSE, retries, typed responses.
