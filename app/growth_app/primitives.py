@@ -100,6 +100,23 @@ _HIGHLIGHT_JS = """el => {
 }"""
 
 
+async def _locate(page, quote: str):
+    """Exact quote first, then shorter word prefixes (rendered DOM text often splits across nodes)."""
+    words = quote.split()
+    for n in dict.fromkeys([len(words), 5, 3]):
+        if n > len(words) or n < 2:
+            continue
+        loc = page.get_by_text(" ".join(words[:n]), exact=False)
+        try:
+            for i in range(min(await loc.count(), 5)):
+                cand = loc.nth(i)
+                if await cand.is_visible():
+                    return cand
+        except Exception:
+            continue
+    return None
+
+
 async def browser_claim_shots(url: str, quotes: dict[str, str], out_dir: Path, trace: Trace, purpose: str) -> dict[str, Path | None]:
     """Browser: one cloud session; find each claim's exact text on the live page, highlight it, screenshot it."""
     from playwright.async_api import async_playwright
@@ -123,8 +140,9 @@ async def browser_claim_shots(url: str, quotes: dict[str, str], out_dir: Path, t
             for claim_id, quote in quotes.items():
                 shots[claim_id] = None
                 try:
-                    loc = page.get_by_text(quote, exact=False).first
-                    await loc.wait_for(state="attached", timeout=4000)
+                    loc = await _locate(page, quote)
+                    if loc is None:
+                        continue
                     await loc.evaluate(_HIGHLIGHT_JS)
                     await page.wait_for_timeout(300)
                     path = out_dir / f"claim-{claim_id}.png"
