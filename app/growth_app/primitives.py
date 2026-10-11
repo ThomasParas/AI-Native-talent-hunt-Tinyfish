@@ -174,7 +174,10 @@ async def browser_screenshot(url: str, out_path: Path, trace: Trace, purpose: st
             page = ctx.pages[0] if ctx.pages else await ctx.new_page()
             if page.url in ("", "about:blank"):
                 await page.goto(url, wait_until="domcontentloaded")
-            await page.wait_for_load_state("networkidle", timeout=15000)
+            try:
+                await page.wait_for_load_state("networkidle", timeout=10000)
+            except Exception:
+                pass  # animated pages may never go idle; screenshot what has rendered
             out_path.parent.mkdir(parents=True, exist_ok=True)
             await page.screenshot(path=str(out_path), full_page=full_page)
             await browser.close()
