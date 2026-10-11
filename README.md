@@ -90,7 +90,7 @@ Requires Python 3.12+, [uv](https://docs.astral.sh/uv/), a [TinyFish key](https:
 (free credits on signup) and an [Anthropic key](https://console.anthropic.com/settings/keys).
 
 ```bash
-unzip app.zip && cd app
+unzip app.zip -d claim-receipts && cd claim-receipts
 cp .env.example .env                 # paste TINYFISH_API_KEY and ANTHROPIC_API_KEY
 uv sync
 uv run python smoke_test.py          # 1 call to each primitive: Search, Fetch, Agent, Browser

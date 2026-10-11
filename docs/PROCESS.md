@@ -19,6 +19,7 @@ TinyFish (Sky Zhang, Head of Growth): ship an agent-led growth app on live TinyF
 | 13:10 | README + launch post from real run; scripted demo recording (Playwright drives the real UI, ffmpeg -> mp4); reviewed frames | Claude Code reviewed extracted video frames to QA | Found + fixed: broken claim images (`safeUrl(null)` resolved to `/null`), locator fallback to numeric tokens; verdicts vary run-to-run, so README now mirrors the recorded run |
 | 13:13 | Final demo take recorded (98s); 4 runs tallied; README + post aligned to real numbers | Claude Code QA'd video frames; kept post 4 per user | Runs: 5–6 ✅ / 2–3 ⚠️ / 0 ❌; 86.7% flag in 2 of 4 runs, disclosed in README |
 | 13:16 | Fresh-unzip test of app.zip (uv sync + smoke test) caught Browser networkidle timeout on tethered network; fixed + re-verified all 4 primitives green; final zip built | Claude Code ran the README steps verbatim in a clean dir | `dist/tinyfish-growth-app.zip` ready |
+| 13:27 | Pre-submit audit: app.zip had run instructions one level down (app/); repackaged so README.md sits at zip root; secrets scan of zip + full git history clean; fresh-unzip re-test | Claude Code checked brief wording against the artifact | Final zip + PROCESS.md + repo-link.txt |
 
 ## Decisions and trade-offs
 - Workflow B over A: every primitive has an essential job, failures degrade to "unverifiable" instead of breaking the demo, no risk of submitting real forms.
