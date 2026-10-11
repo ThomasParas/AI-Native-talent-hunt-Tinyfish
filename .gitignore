@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+app/output/
+dist/
+AI-Native-talent-hunt-hackathon-with-codex-2026_Team-TripOut/

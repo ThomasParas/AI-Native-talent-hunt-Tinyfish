@@ -1,0 +1,22 @@
+# Process Log
+
+Judging covers the result *and how we got there*. Add short, timestamped entries as we work.
+
+## Problem
+TinyFish (Sky Zhang, Head of Growth): ship an agent-led growth app on live TinyFish primitives + launch package
+(app.zip, README.md, demo-video.mp4, launch-post.md). Due 3:30 PM PDT.
+
+## Log
+
+| Time | What we did | AI tool / prompt approach | Outcome |
+|---|---|---|---|
+| 12:15 | Read TinyFish docs (llms.txt, For Coding Agents) and the participant handbook | Claude Code + Firecrawl scrape | Saved full API docs to `docs/tinyfish-llms-full.txt` |
+| 12:20 | Scaffolded repo: uv Python app, primitive wrappers with per-step trace, smoke test, packaging script | Claude Code; introspected SDK signatures instead of guessing | `app/`, `scripts/package.sh` |
+
+## Decisions and trade-offs
+- Python + uv + official `tinyfish` SDK (0.9.0): SDK handles SSE, retries, typed responses.
+- Browser primitive via `client.browser.sessions.create` + Playwright `connect_over_cdp`.
+- Every primitive call records a trace entry, so the demo can show which primitive did which job.
+
+## What we'd do with more time
+-
